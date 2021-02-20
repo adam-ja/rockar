@@ -1,62 +1,68 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Rockar Tech Test
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is my solution to the [Rockar tech test](https://bitbucket.org/domsuttonrockar/rockar-tech-test).
 
-## About Laravel
+## Instructions
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8
+- composer
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Installation
 
-## Learning Laravel
+```
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Running tests
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
+vendor/bin/phpunit
+```
+or, for the prettier output
+```
+php artisan test
+```
 
-## Laravel Sponsors
+### Using the API
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Set the app running:
+```
+php artisan serve
+```
 
-### Premium Partners
+Then send a `GET` request to either of the endpoints. Example URLs are:
+- http://127.0.0.1:8000/api/customers?identifierField=forename&identifier=Dominic&fields[]=forename&fields[]=surname&fields[]=email&fields[]=contact_number&fields[]=postcode
+- http://127.0.0.1:8000/api/products?identifierField=vin&identifier=1G6DP567X50115827&fields[]=make&fields[]=model&fields[]=colour&fields[]=price
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+## Assumptions/interpretations and decisions made
 
-## Contributing
+### Request and response
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+I took the request design to mean that clients of the API could request a subset of attributes (the `fields`) of a product or customer using any field (indicated by the `identifierField`, with the value in `identifier`) as a unique identifier. Therefore, the endpoints I have implemented are simple get endpoints which return a single resource. This works for the simple data set provided in the CSVs as each row has unique values for every field.
 
-## Code of Conduct
+Of course, in a real-world application with a larger data set, this would not be the case. Instead, we would have two `GET` endpoints for each resource. For example, the `/customers` endpoint would expect one or more key-value pairs of fields in the query params to search by and return a collection of all matching customers. A `/customers/{id}` endpoint would then exist which would use a unique identifier (most likely a UUID or auto-incrementing primary key, but possibly the email address if that was deemed appropriate) to find and return a single customer.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+As for the response design, I have not returned a status in the body but all responses have appropriate HTTP status codes. On a successful response, the body is simply the JSON representation of the fields requested for the matching resource. Appropriate bodies are also returned for not found or bad request responses.
 
-## Security Vulnerabilities
+There is very little formatting done on the response - only the price is cast to an integer in the `ProductController`. If there were more formatting to do, this would be pulled out into a separate formatter or view model, but this felt like overkill to cast a single value.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Framework
 
-## License
+I realise that using the full Laravel framework could be considered overkill for this task. However, I understand that it is part of your tech stack and I believe that my submission can serve to demonstrate both some of my general OOP understanding and some of my familiarity with Laravel. Plus, I'm a big believer in not reinventing the wheel!
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The default Laravel installation is all in the initial commit so you can review the code I've actually written [here](https://github.com/adam-ja/rockar/compare/8d278a6...master).
+
+### Database repository
+
+The implementation of the `DatabaseRepository` is admittedly not ideal. It is mostly intended to demonstrate the common interface and the ability to switch between the CSV and database sources through configuration. Similarly, the unit tests of this class do stub out the database connection as instructed but they are not how I would typically test database interactions as they are quite brittle and focus more on the implementation than the result.
+
+In a more fully fleshed out application, we would have a test database to connect to, and the customer and product would be represented by Eloquent models. The repository would then be tested at an integration rather than unit level, with factories used to seed fake data (rolled back on tear down) and the tests asserting that the appropriate models are retrieved for the given input, rather than mocking each step of the query builder as in my unit test.
+
+### Standards
+
+I've followed the standards that I'm used to but can adapt to a team consensus - consistency is the important thing.
+- PSR-12 coding standards.
+- Docblocks are only included where they add some detail that is not already provided by type hints.
+- There are not many comments as I would hope that my code is mostly self-documenting. I do of course comment where something more complicated is going on, or where some business logic needs explaining.
