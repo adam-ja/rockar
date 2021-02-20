@@ -28,15 +28,16 @@ class CsvRepositoryTest extends TestCase
 
     public function testThrowsExceptionIfFileDoesNotExist(): void
     {
+        $repo = new CsvRepository(base_path('no/such/file.csv'));
+
         $this->expectException(Exception::class);
 
-        $repo = new CsvRepository(base_path() . 'no/such/file.csv');
-        $repo->byIdentifier('some field', 'some identifier');
+        $repo->byIdentifier('some_field', 'some identifier', ['some_field']);
     }
 
     public function testReturnsNullIfNoRecordsMatchIdentifier(): void
     {
-        $this->assertNull($this->repo->byIdentifier('forename', 'Bruce'));
+        $this->assertNull($this->repo->byIdentifier('alias', 'Hulk', ['forename', 'surname']));
     }
 
     /**
@@ -51,7 +52,12 @@ class CsvRepositoryTest extends TestCase
         string $identifier,
         array $record
     ): void {
-        $this->assertEquals($record, $this->repo->byIdentifier($identifierField, $identifier));
+        $this->assertEquals($record, $this->repo->byIdentifier($identifierField, $identifier, [
+            'email',
+            'forename',
+            'surname',
+            'alias',
+        ]));
     }
 
     public function provideMatches(): array
@@ -78,13 +84,26 @@ class CsvRepositoryTest extends TestCase
         ];
     }
 
-    public function testReturnsFirstOfMultipleMatches()
+    public function testReturnsFirstOfMultipleMatches(): void
     {
         $this->assertEquals([
             'email'    => 'pparker616@esu.edu',
             'forename' => 'Peter',
             'surname'  => 'Parker',
             'alias'    => 'Spider-Man',
-        ], $this->repo->byIdentifier('alias', 'Spider-Man'));
+        ], $this->repo->byIdentifier('alias', 'Spider-Man', [
+            'email',
+            'forename',
+            'surname',
+            'alias',
+        ]));
+    }
+
+    public function testReturnsOnlyRequestedFields(): void
+    {
+        $this->assertEquals([
+            'forename' => 'Natasha',
+            'surname'  => 'Romanoff',
+        ], $this->repo->byIdentifier('alias', 'Black Widow', ['forename', 'surname']));
     }
 }

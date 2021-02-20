@@ -21,7 +21,7 @@ class CustomerController
     {
         $identifierField = $request->input('identifierField');
         $identifier      = $request->input('identifier');
-        $customer        = $this->customers->byIdentifier($identifierField, $identifier);
+        $customer        = $this->customers->byIdentifier($identifierField, $identifier, $request->input('fields'));
 
         if (! $customer) {
             return new JsonResponse(
@@ -30,6 +30,6 @@ class CustomerController
             );
         }
 
-        return new JsonResponse(array_intersect_key($customer, array_flip($request->input('fields'))));
+        return new JsonResponse($customer);
     }
 }

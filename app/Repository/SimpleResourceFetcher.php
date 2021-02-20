@@ -6,5 +6,5 @@ namespace App\Repository;
 
 interface SimpleResourceFetcher
 {
-    public function byIdentifier(string $identifierField, string $identifier): ?array;
+    public function byIdentifier(string $identifierField, string $identifier, array $fields): ?array;
 }

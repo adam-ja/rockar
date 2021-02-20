@@ -21,7 +21,7 @@ class ProductController
     {
         $identifierField = $request->input('identifierField');
         $identifier      = $request->input('identifier');
-        $product         = $this->products->byIdentifier($identifierField, $identifier);
+        $product         = $this->products->byIdentifier($identifierField, $identifier, $request->input('fields'));
 
         if (! $product) {
             return new JsonResponse(
@@ -30,6 +30,6 @@ class ProductController
             );
         }
 
-        return new JsonResponse(array_intersect_key($product, array_flip($request->input('fields'))));
+        return new JsonResponse($product);
     }
 }

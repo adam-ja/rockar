@@ -14,7 +14,7 @@ class CsvRepository implements SimpleResourceFetcher
     {
     }
 
-    public function byIdentifier(string $identifierField, string $identifier): ?array
+    public function byIdentifier(string $identifierField, string $identifier, array $fields): ?array
     {
         $reader = Reader::createFromPath($this->pathToCsv);
         $reader->setHeaderOffset(0);
@@ -23,6 +23,13 @@ class CsvRepository implements SimpleResourceFetcher
             ->process($reader)
             ->fetchOne();
 
-        return empty($result) ? null : array_map('trim', $result);
+        if (empty($result)) {
+            return null;
+        }
+
+        return array_intersect_key(
+            array_map('trim', $result),
+            array_flip($fields)
+        );
     }
 }
