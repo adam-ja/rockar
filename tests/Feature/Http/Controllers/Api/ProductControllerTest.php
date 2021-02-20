@@ -45,4 +45,15 @@ class ProductControllerTest extends TestCase
                 'price' => '10000',
             ]);
     }
+
+    public function testFormatsPriceAsInt(): void
+    {
+        $this->getJson(route('api.products.get', [
+            'identifierField' => 'vin',
+            'identifier'      => 'WVGCV7AX7AW000784',
+            'fields'          => ['price'],
+        ]))
+            ->assertOk()
+            ->assertJson(['price'   => 10000]);
+    }
 }

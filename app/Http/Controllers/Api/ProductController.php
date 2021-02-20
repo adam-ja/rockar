@@ -30,6 +30,10 @@ class ProductController
             );
         }
 
+        if (isset($product['price'])) {
+            $product['price'] = (int) $product['price'];
+        }
+
         return new JsonResponse($product);
     }
 }
