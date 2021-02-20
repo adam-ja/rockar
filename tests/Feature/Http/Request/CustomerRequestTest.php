@@ -26,7 +26,7 @@ class CustomerRequestTest extends TestCase
     public function testValidDataPassesValidation(): void
     {
         $this->getJson(route('api.customers.get', $this->validData()))
-            ->assertOk();
+            ->assertJsonMissingValidationErrors();
     }
 
     /**
@@ -34,9 +34,9 @@ class CustomerRequestTest extends TestCase
      *
      * @param string $key
      * @param mixed $value
-     * @param array $messages
+     * @param string $message
      */
-    public function testInvalidDataFailsValidationWithExpectedMessages(string $key, $value, array $messages): void
+    public function testInvalidDataFailsValidationWithExpectedMessage(string $key, $value, string $message): void
     {
         $data = $this->validData();
 
@@ -44,7 +44,7 @@ class CustomerRequestTest extends TestCase
 
         $this->getJson(route('api.customers.get', $data))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(['errors' => $messages]);
+            ->assertJsonValidationErrors([$key => $message]);
     }
 
     public function provideInvalidData(): array
@@ -53,37 +53,37 @@ class CustomerRequestTest extends TestCase
             'missing identifier' => [
                 'identifier',
                 null,
-                ['identifier' => ['An identifier must be provided.']],
+                'An identifier must be provided.',
             ],
             'non-string identifier' => [
                 'identifier',
                 ['not a' => 'string'],
-                ['identifier' => ['The identifier must be a string.']],
+                'The identifier must be a string.',
             ],
             'missing identifierField' => [
                 'identifierField',
                 null,
-                ['identifierField' => ['An identifier field must be provided.']],
+                'An identifier field must be provided.',
             ],
             'unrecognised identifierField' => [
                 'identifierField',
                 'abcdef',
-                ['identifierField' => ['The selected identifier field is invalid.']],
+                'The selected identifier field is invalid.',
             ],
             'missing fields' => [
                 'fields',
                 null,
-                ['fields' => ['The fields to be retrieved must be provided.']],
+                'The fields to be retrieved must be provided.',
             ],
             'non-array fields' => [
                 'fields',
                 'not an array',
-                ['fields' => ['The fields must be an array.']],
+                'The fields must be an array.',
             ],
             'unrecognised field in fields' => [
                 'fields.0',
                 'abcdef',
-                ['fields.0' => ['The selected fields.0 is invalid.']],
+                'The selected fields.0 is invalid.',
             ],
         ];
     }
