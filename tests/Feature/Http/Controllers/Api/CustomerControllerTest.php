@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Api;
 
-use App\Http\Request\CustomerRequest;
+use App\Http\Request\GetCustomerRequest;
 use Faker\Factory;
 use Tests\TestCase;
 
@@ -15,9 +15,9 @@ class CustomerControllerTest extends TestCase
         $faker = Factory::create();
 
         $this->getJson(route('api.customers.get', [
-            'identifierField' => $identifierField = $faker->randomElement(CustomerRequest::FIELDS),
+            'identifierField' => $identifierField = $faker->randomElement(GetCustomerRequest::FIELDS),
             'identifier'      => $identifier = $faker->word,
-            'fields'          => CustomerRequest::FIELDS,
+            'fields'          => GetCustomerRequest::FIELDS,
         ]))
             ->assertNotFound()
             ->assertJson(['message' => "No customer found with $identifierField $identifier."]);

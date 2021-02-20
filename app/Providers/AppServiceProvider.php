@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\ProductController;
 use App\Repository\CsvRepository;
 use App\Repository\SimpleResourceFetcher;
 use Illuminate\Support\Facades\Config;
@@ -17,6 +18,13 @@ class AppServiceProvider extends ServiceProvider
             ->needs(SimpleResourceFetcher::class)
             ->give(function (): SimpleResourceFetcher {
                 return new CsvRepository(Config::get('data.customers.path_to_csv'));
+            });
+
+        $this->app
+            ->when(ProductController::class)
+            ->needs(SimpleResourceFetcher::class)
+            ->give(function (): SimpleResourceFetcher {
+                return new CsvRepository(Config::get('data.products.path_to_csv'));
             });
     }
 }

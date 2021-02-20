@@ -7,19 +7,11 @@ namespace App\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CustomerRequest extends FormRequest
+abstract class GetResourceRequest extends FormRequest
 {
-    public const FIELDS = [
-        'email',
-        'forename',
-        'surname',
-        'contact_number',
-        'postcode',
-    ];
-
     public function rules(): array
     {
-        $validFieldsRule = Rule::in(self::FIELDS);
+        $validFieldsRule = Rule::in($this->validFields());
 
         return [
             'identifier'      => 'required|string',
@@ -40,4 +32,6 @@ class CustomerRequest extends FormRequest
             'fields.required'          => 'The fields to be retrieved must be provided.',
         ];
     }
+
+    abstract protected function validFields(): array;
 }

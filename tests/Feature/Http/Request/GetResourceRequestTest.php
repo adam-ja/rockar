@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Request;
 
-use App\Http\Request\CustomerRequest;
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,9 +11,9 @@ use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
-class CustomerRequestTest extends TestCase
+abstract class GetResourceRequestTest extends TestCase
 {
-    private Generator $faker;
+    protected Generator $faker;
 
     protected function setUp(): void
     {
@@ -25,7 +24,7 @@ class CustomerRequestTest extends TestCase
 
     public function testValidDataPassesValidation(): void
     {
-        $this->getJson(route('api.customers.get', $this->validData()))
+        $this->getJson(route($this->route(), $this->validData()))
             ->assertJsonMissingValidationErrors();
     }
 
@@ -42,7 +41,7 @@ class CustomerRequestTest extends TestCase
 
         is_null($value) ? Arr::forget($data, $key) : Arr::set($data, $key, $value);
 
-        $this->getJson(route('api.customers.get', $data))
+        $this->getJson(route($this->route(), $data))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrors([$key => $message]);
     }
@@ -88,15 +87,7 @@ class CustomerRequestTest extends TestCase
         ];
     }
 
-    private function validData(): array
-    {
-        return [
-            'identifier'      => $this->faker->word,
-            'identifierField' => $this->faker->randomElement(CustomerRequest::FIELDS),
-            'fields'          => $this->faker->randomElements(
-                CustomerRequest::FIELDS,
-                $this->faker->numberBetween(1, count(CustomerRequest::FIELDS))
-            ),
-        ];
-    }
+    abstract protected function route(): string;
+
+    abstract protected function validData(): array;
 }
